@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+    <h1>Chatting</h1>
+    <h3 id="userIdDisplay"></h3>
+    <h2>Select Recipient:</h2>
+    <select id="selectRecipient">
+        <option value="hamza">hamza</option>
+        <option value="ahmed">ahmed</option>
+        <option value="haris">haris</option>
+        <option value="ali">ali</option>
+        <!-- Add more options for other users if needed -->
+    </select>
+    <input type="text" id="message" placeholder="Enter Message">
+    <button id="send">Send</button>
+    <div id="messageDisplay"></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const send = document.getElementById("send");
+        const messageInput = document.getElementById("message");
+        const selectRecipient = document.getElementById("selectRecipient");
+        const messageDisplay = document.getElementById("messageDisplay");
+        const userId = prompt("Enter your user ID:");
+        userIdDisplay.textContent = `User ID: ${userId}`;
+        // Emit user-join event with a user ID when connected
+
+        socket.on("connect", () => {
+            socket.emit("user-join", userId);
+        });
+
+        send.addEventListener("click", () => {
+            const recipientUserId = selectRecipient.value;
+            const message = messageInput.value;
+            socket.emit("user-message", { userId, recipientUserId, message });
+        });
+
+        socket.on("message", ({ sender, message }) => {
+            // Display received messages
+            displayMessage(sender, message);
+        });
+
+        function displayMessage(sender, message) {
+            const formattedMessage = `${sender}: ${message}`;
+            const messageElement = document.createElement("p");
+            messageElement.textContent = formattedMessage;
+            messageDisplay.appendChild(messageElement);
+        }
+    </script>
+</body>
+</html>
